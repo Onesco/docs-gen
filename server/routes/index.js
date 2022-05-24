@@ -1,19 +1,17 @@
 'use strict'
-
 const { Router } = require("express");
 const Ajv = require("ajv");
 const ajv = new Ajv({allErrors: true})
-
-
 
 const router =  Router()
 
 const val = {
     title: 'string required max=5 min=4',
     name: 'string',
-    age: 'integer required',
+    age: 'number|integer required',
     isTrue:'boolean required',
     email:'email',
+    additionalProperties: true,
     em:'hello hi',
     obj:{
         additionalProperties: true,
@@ -26,8 +24,7 @@ const val = {
             additionalProperties: true,
         }
     },
-    arr:['number'
-    ]
+    arr:['any']
 }
 
 const f2 = (body={'a':2})=>{
@@ -105,13 +102,19 @@ const f2 = (body={'a':2})=>{
                                         schema.properties[`${key}`]['items']['type'] = itemType
                                     } 
                                     else if(itemType.trim().search('maxItems') ===0){
-                                        schema.properties[`${key}`]['items']['minItems'] = Number(itemType.split('maxItems=')[1])
+                                        schema.properties[`${key}`]['type'] = 'array'
+                                        schema.properties[`${key}`]['items']['maxItems'] = Number(itemType.split('maxItems=')[1])
                                     } 
                                     else if(itemType.trim().search('minItems') ===0){
-                                        schema.properties[`${key}`]['itmes']['minItems'] = Number(itemType.split('maxItems=')[1])
+                                        schema.properties[`${key}`]['type'] = 'array'
+                                        schema.properties[`${key}`]['itmes']['minItems'] = Number(itemType.split('minItems=')[1])
                                     }
                                     else if(itemType.trim().search('uniqueItems') ===0){
-                                        schema.properties[`${key}`]['itmes']['minItems'] = Boolean(itemType.split('uniqueItems=')[1])
+                                        schema.properties[`${key}`]['itmes']['uniqueItems'] = Boolean(itemType.split('uniqueItems=')[1])
+                                    }
+                                    else if(itemType.trim().search('any') ===0){
+                                        schema.properties[`${key}`]['items'] = {}
+                                        schema.properties[`${key}`]['items']['anyOf'] = [{type: "string"},{type: "number"}, {type: "integer"},{type: "boolean"}, {type: "object"}]
                                     }
                                 }
                                 // generateValidator(schema, key, operadList)
@@ -155,6 +158,16 @@ const f2 = (body={'a':2})=>{
                     else if(vaop.trim().search('min') ===0){
                         schema.properties[`${key}`]['minLength'] = Number(vaop.split('min=')[1])
                     }
+                    else if(vaop.trim().search('any') ===0){
+                        schema.properties[`${key}`]['anyOf'] = [{type: "string"},{type: "number"}, {type: "integer"},{type: "boolean"}, {type: "object"}]
+                    }
+                    else if(vaop.trim().indexOf('|') !==-1){
+                        let types = vaop.split('|')
+                        schema.properties[`${key}`]['anyOf'] = []
+                        for(let type of types){
+                        schema.properties[`${key}`]['anyOf'].push({type})
+                        }
+                    }
                     else{
                         enumerable.push(vaop)
                     }      
@@ -169,7 +182,8 @@ const f2 = (body={'a':2})=>{
 
             let validate = ajv.compile(schema)
             const data = {
-                age: 2,
+                age: "hello",
+                name:'john doe',
                 title: "khhf",
                 isTrue: true,
                 email:"hello@gmail.com",
@@ -183,16 +197,17 @@ const f2 = (body={'a':2})=>{
                         come:4,
                     }
                 },
-                arr:[]
+                arr:['hello']
               }
             const valid = validate(data)
-            if (!valid) {
-                console.log(schema)
-                res.send(validate.errors)
+            if (valid) {
+                // console.log(schema.properties.arr)
+                next()
             }
             else{
-                console.log(schema)
-                next()
+                // console.log(schema.properties.arr)
+                res.send(validate.errors)
+                
             }
         }
     }
