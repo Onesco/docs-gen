@@ -1,8 +1,11 @@
 'use strict'
 const { Router } = require("express");
 const Ajv = require("ajv");
-const fs = require('fs')
-const os = require('os')
+const fs = require('fs');
+const path = require("path");
+const { dirname } = require("path");
+const _ = require('lodash')
+const openApi = require('../autoGen/openApi.json')
 
 
 const ajv = new Ajv({allErrors: true})
@@ -12,33 +15,88 @@ const router =  Router()
 
 const post ={
     name: 'string',
-    age: 'integer|number required',
+    age: 'number required',
     isTrue:'boolean required',
     email:'email',
 }
-
-
-let templete = {
-    openapi: '3.0.0',
-    info: {
-      title: 'Hello World',
-      version: '1.0.0',
-    },
-    servers: [],
-    paths:{ 
-    }
+const paramSchema ={
+    userId:'string required',
+    commentId: 'string'
 }
-// generate metedata
-// const getMetaData = ()=>{
-//     console.log(os.homedir())
-// }
 
+const querySchema ={
+    skip:'string required',
+    limit: 'string'
+}
+
+const jsonSchema ={}
+const pathSchema = {}
+
+const getRoutePath = (dirname)=> dirname(require.main.fiename 
+    || process.mainModule.filename)
+
+
+// let templete = JSON.parse(fs.readFileSync(path.join(getRoutePath(dirname),"autoGen/openApi.json"), "utf8"))
+let templete = openApi
+
+// console.log(__dirname)
+let options = {
+    title: 'Testing API',
+    version: '2.0.4',
+    description:"",
+    summary:"",
+    termsOfService:"",
+    license:"",
+    contact:""
+}
+// get the root path of the project
+
+const getMetaData = (...args)=>{
+    const {
+        title,
+        version, 
+        description,
+        summary,
+        termsOfService,
+        license,
+        contact
+    } = args[0]
+    let packageFilePath = path.join(getRoutePath(dirname),"package.json")
+
+    if(!title || !version){
+        fs.readFile(packageFilePath, (err, file)=>{
+            if (err) console.log(err)
+            file = JSON.parse(file)
+            let {name, version, description} = file
+            templete.info.title = name
+            templete.info.version = version
+            templete.info.description = description
+        })
+    }else{
+        templete.info = {
+        ...templete.info,title, version, description,summary,termsOfService,
+        license,
+        contact
+        }
+    }
+
+}
+getMetaData(options)
 // utilitiy functions
-
 function generateDocs(...args) {
 
     args = args[0];
-    let { method, params, query, baseUrl, route, host, bodySchema } = args;
+    let { 
+        method, 
+        params,
+        querySchema, 
+        baseUrl,
+        route, 
+        host, 
+        bodySchema,
+        paramsSchema,
+        qSchema
+    } = args;
 
     let path = baseUrl + route;
 
@@ -64,25 +122,27 @@ function generateDocs(...args) {
     templete.paths[`${path}`] = {};
     let parameters = [];
 
+    // params schema docs set up
     if (Object.keys(params).length > 0) {
         for (let key of Object.keys(params)) {
             parameters = [...parameters, {
                 name: key,
                 in: 'path',
-                required: true,
-                schema: { type: "string" }
+                required: !paramsSchema?.required?.indexOf(key),
+                schema: paramsSchema?.properties?.key
             }];
         }
         templete.paths[`${path}`].parameters = parameters;
     }
 
-    if (Object.keys(query).length > 0) {
-        for (let key of Object.keys(query)) {
+    // query schema docs set up
+    if (Object.keys(querySchema).length > 0) {
+        for (let key of Object.keys(querySchema)) {
             parameters = [...parameters, {
                 name: key,
                 in: 'query',
-                required: true,
-                schema: { type: "string" }
+                required: !qSchema?.required?.indexOf(key),
+                schema: qSchema?.properties?.key
             }];
         }
         templete.paths[`${path}`].parameters = parameters;
@@ -98,7 +158,7 @@ function generateDocs(...args) {
 
     baseUrl = baseUrl === "" ? baseUrl : baseUrl.split('/')[1];
     templete.paths[`${path}`][`${method}`] = {
-        description: `This end point is for ${method} ${desscription}`,
+        description: `This end point is for ${method}ing ${desscription}`,
         responses: {
             200: {
                 description: "sucessful",
@@ -109,17 +169,9 @@ function generateDocs(...args) {
             },
             404: {
                 description: "bad request",
-                content:{
-                    "application/json": {
-                    }
-                }
             },
             500: {
                 description: "server error",
-                content:{
-                    "application/json": {
-                    }
-                }
             }
         },
         tags: [baseUrl],
@@ -138,9 +190,11 @@ function generateDocs(...args) {
         }
         
     }
-    // console.log(JSON.stringify(templete))
+return {
+    operationId,
+    openAPI:JSON.stringify(templete)
+    }
 }
-
 const generateSchema = (body)=>{
     let schema = {
         type: 'object',
@@ -288,27 +342,12 @@ const generateArrayItemValidator = (schema, key, item)=>{
         ]
     }
 }
-
-// the form  body  validator
-const validateBody =(body, req, res, next)=>{
-
-    const reqBody = req.body
-    
-   if(Object.keys(body).length === 0){
-        return res.status(406).send({
-            errorType:"validation error",
-            message:"can not valdate empty body. Please provide the body object"
-        })
-    }
-                
-    const schema = generateSchema(body)
-    req.bodySchema = schema
-    
+const validate = (schema, reqBody, req, res, next)=>{
     const validate = ajv.compile(schema)
     
     const valid = validate(reqBody)
     if (valid) {
-        next()
+        if(next) next()
     }
     else{
         req.isInvalid = true
@@ -316,66 +355,142 @@ const validateBody =(body, req, res, next)=>{
     }
 }
 
+
+// the form  body  validator
+const validateBody =(body, req, res,next)=>{
+
+    const reqBody = req.body
+    const schema = generateSchema(body)
+    req.bodySchema = schema
+    
+    validate(schema, reqBody, req, res, next)
+}
+
 // validate params utility function
-const validateParams = (paramSchema, param, res)=>{     
+const validateParams = (paramSchema, params, req, res)=>{     
     const schema = generateSchema(paramSchema)
+    req.paramsSchema = schema
+    validate(schema, params, req, res)
 }
 
 // validate query utility function
-const validateQuery = (querySchema, query, res)=>{     
+const validateQuery = (querySchema, query, req, res)=>{     
     const schema = generateSchema(querySchema)
+    req.qSchema = schema
+    validate(schema, query, req, res)
 }
 // validate response utility function
 const validateResponse = (responseSchema, req, res)=>{     
     const schema = generateSchema(responseSchema)
 }
 
-
 // the entry validation function
-const validator= (body={}, paramSchema={}, querySchema={}, responseSchema={}) => 
+const validator= (body, paramSchema, querySchema={}) => 
 (req, res, next) => {
     
     const method = req.method.toLocaleLowerCase()
     const {params, query, baseUrl} = req
     const host = req.headers.host
     const route = req.route.path
+
+    const newPath = method+baseUrl+route
+    const newPathSchema = {}
+    newPathSchema[`${newPath}`] = {body,paramSchema,querySchema}
+    
+    // check if this end point has already Jsonschemas for the path operation
+    // then check if any field value of the pathSchema has changed then generated new JsonSchemas
    
-    // validate query
-    if(Object.keys(querySchema).length === 0){
-        validateQuery(querySchema, query, res) 
-    }
-    // validate params
-    if(Object.keys(paramSchema).length === 0){
-        validateParams(paramSchema, params, res) 
-    }
+    if(jsonSchema.hasOwnProperty(newPath) && _.isEqual(pathSchema[`${newPath}`], {body,paramSchema,querySchema})){
+        console.log('second click')
+       
+        let {bodySchema,paramsSchema,qSchema} = jsonSchema[`${newPath}`]
+        
+        paramsSchema ? validate(paramsSchema, params, req, res) : null
+        qSchema ? validate(qSchema, query, req, res) : null
+        bodySchema ? validate(bodySchema, req.body, req, res, next): null
 
-    // validate response
-    if(Object.keys(responseSchema).length === 0){
-        validateResponse(responseSchema, req, res) 
-    }
+        // move the next route function after validation
+        if(!req?.isInvalid){
+            next()
+        }
+    } 
+    // if the path is new one then validate its path operations
+    else{
+            // validate query
+        if(querySchema && Object.keys(querySchema).length > 0){
+            validateQuery(querySchema, query, req, res) 
+        }
+        // validate params
+        if(paramSchema && Object.keys(paramSchema).length > 0){
+            validateParams(paramSchema, params, req, res) 
+        }
 
-    // validate body schema since the method is not "get"
-    if(method !=='get'){
-        validateBody(body, req, res, next)
-    }
-    // generate documentation for the path
-    let bodySchema = req?.bodySchema
-    generateDocs({method, params, query, baseUrl, route, host, bodySchema})
+        // validate body schema since the method is not "get"
+        if(method !=='get'){
+            
+            if(body && Object.keys(body).length > 0 ){
+                validateBody(body, req, res, next)
+            }else{
+                return res.status(406).send({
+                errorType:"validation error",
+                message:"can't valdate empty body schema. Please provide the body schema"
+                })
+            }
+        }
+        // generate json schemas for the path operation
+        let {bodySchema, paramsSchema, qSchema} = req
+        
+          // generate documentation for the path
+        const {operationId, openAPI} = generateDocs({
+            method, 
+            params, 
+            querySchema,
+            baseUrl, 
+            route,
+            host, 
+            bodySchema,
+            paramsSchema,
+            qSchema
+        })
 
-    // move the next function after validation
-    if(!req?.isInvalid){
-        next()
+        
+        // the generated json path schema
+        jsonSchema[`${newPath}`] ={
+            bodySchema,
+            paramsSchema,
+            qSchema
+        }
+        // raw path schema
+        pathSchema[`${newPath}`] = {
+            body,paramSchema,querySchema 
+        }
+        console.log("first click")
+        // write the openApi and json schema to a file
+        fs.writeFile(path.join(getRoutePath(dirname),"autoGen/openApi.json"),openAPI, (err)=>{console.log(err)})
+        fs.writeFile(path.join(getRoutePath(dirname),"autoGen/jsonSchema.json"),JSON.stringify(jsonSchema), (err)=>{console.log(err)})
+        // move the next route function after validation
+        if(!req?.isInvalid){
+            next()
+        }
     }
 }
   
 
-router.get(`/users/:userid/`, validator(), (req, res)=>{
+
+
+
+
+
+
+
+
+router.get(`/users/:userId/`, validator({},paramSchema), (req, res)=>{
     res.send("hello world " + req.params.id)
 })
-router.get(`/users/:userid/comments`, validator(), (req, res)=>{
+router.get(`/users/:userId/comments`, validator(), (req, res)=>{
     res.send("hello world " + req.params.id)
 })
-router.get(`/users/:userid/comments/:commentId`, validator(), (req, res)=>{
+router.get(`/users/:userId/comments/:commentId`, validator({},paramSchema,querySchema), (req, res)=>{
     res.send("hello world " + req.params.id)
 })
 
@@ -383,11 +498,10 @@ router.get('/', validator(), (req, res)=>{
     res.send("hello world")
 })
 
-router.get(`/users`, validator(), (req, res)=>{
+router.get(`/users`, validator(null,null,querySchema), (req, res)=>{
     res.send("hello world users" )
 })
 router.post(`/users`, validator(post), (req, res)=>{
-    // console.log(req.body)
     res.send("hello world users" )
 })
 
