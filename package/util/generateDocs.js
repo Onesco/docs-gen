@@ -1,14 +1,22 @@
-const templete =  require("../constants/swaggerTemplete.json")
+const swaggerUi = require('swagger-ui-express')
+const express =  require("express")
+const fs = require("fs")
+const app = express()
+const temp =  require("../constants/swaggerTemplete.json")
+const swaggerDoc = require("../schemas/swaggerDocument.json")
+
+
 
 function generateDocs(...args) {
-
+    const templete = Object.keys(swaggerDoc).length !== 0 ? require("../schemas/swaggerDocument.json") : temp 
+    
     args = args[0];
     let { 
         method, 
         params,
         querySchema, 
         baseUrl,
-        route, 
+        route,   
         host, 
         bodySchema,
         paramsSchema,
@@ -16,7 +24,7 @@ function generateDocs(...args) {
     } = args;
 
     let path = baseUrl + route;
-
+   
     // replace the :id to {id} on path parameter
     // get operationID path
     let opPath = path;
@@ -46,7 +54,7 @@ function generateDocs(...args) {
                 name: key,
                 in: 'path',
                 required: !paramsSchema?.required?.indexOf(key),
-                schema: paramsSchema?.properties?.key
+                schema: paramsSchema?.properties[`${key}`]
             }];
         }
         templete.paths[`${path}`].parameters = parameters;
@@ -59,7 +67,7 @@ function generateDocs(...args) {
                 name: key,
                 in: 'query',
                 required: !qSchema?.required?.indexOf(key),
-                schema: qSchema?.properties?.key
+                schema: qSchema?.properties[`${key}`]
             }];
         }
         templete.paths[`${path}`].parameters = parameters;
@@ -107,6 +115,9 @@ function generateDocs(...args) {
         }
         
     }
+    // load the swaggerUI to update the documentation page
+    app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
+    
 return {
     operationId,
     openAPI:JSON.stringify(templete)

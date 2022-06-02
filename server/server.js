@@ -1,17 +1,18 @@
 const express =  require("express")
 const bodyParser = require('body-parser')
 const {router} = require("./routes/index")
-const swaggerUi = require('swagger-ui-express')
-const openApi = require("./autoGen/openApi.json")
+const {config} = require('docgen')
 
 const app = express()
+
+
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
+config({app, title:"Hello world API", version:"1.0.2"})
 
 
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApi));
 
 
 

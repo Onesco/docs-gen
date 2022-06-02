@@ -1,13 +1,15 @@
 const _ = require('lodash')
 const fs = require('fs');
-const path = require("path");
-const { dirname } = require("path");
+const {resolve} = require("path");
 
 const {config} = require('./config/setting')
 
 const validate = require("./util/validate")
 const generateDocs = require("./util/generateDocs")
-const getRoutePath = require("./util/getRootPath")
+// const getRoutePath = require("./util/getRootPath")
+
+let jsonSchema =  require("./schemas/jsonSchema.json")
+let pathSchema =  require("./schemas/pathSchema.json")
 
 const {
     validateBody,
@@ -15,8 +17,6 @@ const {
     validateQuery
 } = require("./util/pathOperation")
 
-const jsonSchema ={}
-const pathSchema = {}
 
 // the entry validation function
 const validator = (body, paramSchema, querySchema={}) => 
@@ -35,7 +35,7 @@ const validator = (body, paramSchema, querySchema={}) =>
     // then check if any field v alue of the pathSchema has changed then generated new JsonSchemas
    
     if(jsonSchema.hasOwnProperty(newPath) && _.isEqual(pathSchema[`${newPath}`], {body,paramSchema,querySchema})){
-        console.log('second click')
+      
        
         let {bodySchema,paramsSchema,qSchema} = jsonSchema[`${newPath}`]
         
@@ -75,7 +75,7 @@ const validator = (body, paramSchema, querySchema={}) =>
         let {bodySchema, paramsSchema, qSchema} = req
         
           // generate documentation for the path
-        const {operationId, openAPI} = generateDocs({
+        const {openAPI} = generateDocs({
             method, 
             params, 
             querySchema,
@@ -99,8 +99,9 @@ const validator = (body, paramSchema, querySchema={}) =>
         }
      
         // write the openApi and json schema to a file
-        fs.writeFile(path.join(getRoutePath(dirname),"autoGens/swaggerDocument.json"),openAPI, (err)=>{console.log(err)})
-        fs.writeFile(path.join(getRoutePath(dirname),"autoGens/jsonSchema.json"),JSON.stringify(jsonSchema), (err)=>{console.log(err)})
+        fs.writeFile(resolve('../package/schemas/swaggerDocument.json'),openAPI,(err)=>{})
+        fs.writeFile(resolve('../package/schemas/jsonSchema.json'),JSON.stringify(jsonSchema),(err)=>{})
+        fs.writeFile(resolve('../package/schemas/pathSchema.json'),JSON.stringify(pathSchema),(err)=>{})
         // move the next route function after validation
         if(!req?.isInvalid){
             next()
