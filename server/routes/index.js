@@ -48,6 +48,10 @@ router.get(`/users`, validator(null,null,querySchema), (req, res)=>{
     res.send("hello world users" )
 })
 
+router.get(`/users/mess`, validator(null), (req, res)=>{
+    res.send("hello world users" )
+})
+
 
 module.exports  = {
     router

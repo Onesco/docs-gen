@@ -1,21 +1,22 @@
 const _ = require('lodash')
 const fs = require('fs');
-const {resolve} = require("path");
+const {dirname, join} = require("path");
 
 const {config} = require('./config/setting')
 
 const validate = require("./util/validate")
 const generateDocs = require("./util/generateDocs")
-// const getRoutePath = require("./util/getRootPath")
+const getRoutePath = require("./util/getRootPath")
 
-let jsonSchema =  require("./schemas/jsonSchema.json")
-let pathSchema =  require("./schemas/pathSchema.json")
+const autoGenPath =  join(getRoutePath(dirname),"autoGens")
+
 
 const {
     validateBody,
     validateParams,
     validateQuery
-} = require("./util/pathOperation")
+} = require("./util/pathOperation");
+
 
 
 // the entry validation function
@@ -30,13 +31,18 @@ const validator = (body, paramSchema, querySchema={}) =>
     const newPath = method+baseUrl+route
     const newPathSchema = {}
     newPathSchema[`${newPath}`] = {body,paramSchema,querySchema}
+
+
+    // load the previous the path and json schemas    
+    let jsonSchema =  JSON.parse(fs.readFileSync(join(autoGenPath,"jsonSchema.json")))
+    let pathSchema =   JSON.parse(fs.readFileSync(join(autoGenPath,"pathSchema.json")))
     
-    // check if this end point has already Jsonschemas for the path operation
-    // then check if any field v alue of the pathSchema has changed then generated new JsonSchemas
+    // check if this end point has already a Jsonschema for the path operation
+    // then check if any field value of the pathSchema has changed then generated new JsonSchemas
+    // else used the already generated schema
    
     if(jsonSchema.hasOwnProperty(newPath) && _.isEqual(pathSchema[`${newPath}`], {body,paramSchema,querySchema})){
       
-       
         let {bodySchema,paramsSchema,qSchema} = jsonSchema[`${newPath}`]
         
         paramsSchema ? validate(paramsSchema, params, req, res) : null
@@ -99,9 +105,9 @@ const validator = (body, paramSchema, querySchema={}) =>
         }
      
         // write the openApi and json schema to a file
-        fs.writeFile(resolve('../package/schemas/swaggerDocument.json'),openAPI,(err)=>{})
-        fs.writeFile(resolve('../package/schemas/jsonSchema.json'),JSON.stringify(jsonSchema),(err)=>{})
-        fs.writeFile(resolve('../package/schemas/pathSchema.json'),JSON.stringify(pathSchema),(err)=>{})
+        fs.writeFile(join(autoGenPath,"swaggerDocument.json"),openAPI,(err)=>{})
+        fs.writeFile(join(autoGenPath,"jsonSchema.json"),JSON.stringify(jsonSchema),(err)=>{})
+        fs.writeFile(join(autoGenPath,"pathSchema.json"),JSON.stringify(pathSchema),(err)=>{})
         // move the next route function after validation
         if(!req?.isInvalid){
             next()

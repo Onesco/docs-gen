@@ -1,1 +1,0 @@
-{"get/api/":{},"get/api/users":{"qSchema":{"type":"object","properties":{"skip":{"type":"string"},"limit":{"type":"string"}},"required":["skip"],"additionalProperties":false}}}

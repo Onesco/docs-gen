@@ -2,13 +2,14 @@ const swaggerUi = require('swagger-ui-express')
 const express =  require("express")
 const fs = require("fs")
 const app = express()
-const temp =  require("../constants/swaggerTemplete.json")
-const swaggerDoc = require("../schemas/swaggerDocument.json")
+const { join, dirname} = require('path')
 
 
+const getRoutePath = require("./getRootPath")
+const autoGenPath = join(getRoutePath(dirname),"autoGens")
 
 function generateDocs(...args) {
-    const templete = Object.keys(swaggerDoc).length !== 0 ? require("../schemas/swaggerDocument.json") : temp 
+    const templete = require(join(autoGenPath, "swaggerDocument.json")) 
     
     args = args[0];
     let { 

@@ -1,6 +1,6 @@
 const fs = require('fs');
-const { dirname } = require("path");
-const path = require('path')
+const { dirname, join } = require("path");
+
 const templete =  require("../constants/swaggerTemplete.json")
 const getRoutePath = require('../util/getRootPath')
 
@@ -16,7 +16,7 @@ const getMetaData = (...args)=>{
         contact
     } = args[0]
 
-    let packageFilePath = path.join(getRoutePath(dirname),"package.json")
+    let packageFilePath = join(getRoutePath(dirname),"package.json")
 
     if(!title || !version){
         fs.readFile(packageFilePath, (err, file)=>{

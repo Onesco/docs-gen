@@ -1,1 +1,0 @@
-{"get/api/":{"querySchema":{}},"get/api/users":{"body":null,"paramSchema":null,"querySchema":{"skip":"string required","limit":"string"}}}
