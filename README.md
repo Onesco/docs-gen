@@ -1,8 +1,7 @@
 # docsgen
-This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of AJV json schem validator, and
-also auto generate json file that mets the OPEN API specification for path operation documantation. 
+This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documantation. 
 
-The Docsgen package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live swagger ui documentation page and allow you to focus on the key business logic of your application endpoint.
+The Docsgen package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
 
 This package is highly insipred by FASTAPI which is a python library that makes the developing API supper fast while using python and seeks to introduce thesame speed for nodejs backend developers.
 
@@ -19,7 +18,7 @@ npm install docsgen
 ## Getting Started
 *To get this package running with your express apllicaton, follow  these simple example steps.*
 
-- ### Configure the package to your test
+- ### 1. Configure the package to your test
 
 > At the index of your express application where you intialized the express app, import config function of the docsgen package and configure the docsgen package by parsing the following options:
 ```
@@ -28,8 +27,8 @@ npm install docsgen
     title: the api documentation page title -OPTIONAL
    version: the version of the API - OPTIONAL, 
    description : the API documentation page title - OPTIONAL,
-    summary : the API documentation page title - <*OPTIONAL,
-    termsOfService : <A URL to the Terms of Service for the API. This MUST be in the form of a URL. - OPTIONAL,
+    summary : the API documentation page title - OPTIONAL,
+    termsOfService : A URL to the Terms of Service for the API. This MUST be in the form of a URL. - OPTIONAL,
     license : {
       name: The license name used for the API. if lincense object is provided then the name is REQUIRED>
       url:  A URL to the license used for the API. This MUST be in the form of a URL. OPTIONAL
@@ -60,7 +59,7 @@ const options = {
     app,
     title:"Testing API", 
     version:"1.0.0",
-    contacr:{
+    contact:{
         email: "hello@example.com",
         "name": "Da Santos"
     },
@@ -71,4 +70,26 @@ config(options)
 ```
 > *note that you need to used the bodyParser first as the assess to the query body depends on it, and the only required field to be provided is the express app*
 
+- ### 2. Use the Validator
+> *Import the validator function from the docgen package and pass it as the middleware function in any path operation you want to validate and generate documentation for*
+````
+...
+const {validator} = require('docgen')
 
+app.get('/',validator(), (req, res)=>{
+    res.send('welcome')
+}) 
+```
+**OR within the express router **
+
+```
+...
+const {Router} = require("express");
+const {validator} = require('docgen')
+
+const router =  Router()
+
+router.get('/',validator(), (req, res)=>{
+    res.send("hello world")
+})
+```
