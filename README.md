@@ -1,7 +1,10 @@
 # docsgen
-This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the supper fast power of AJV json schem validator.
-this package also auto generate json file that mets the OPEN API specification for path operation documantation. 
-The Docsgen package abtract the stress of documenting each API endpoints through an automated scripts and allow you to focus on the key business logic of your application
+This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of AJV json schem validator, and
+also auto generate json file that mets the OPEN API specification for path operation documantation. 
+
+The Docsgen package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live swagger ui documentation page and allow you to focus on the key business logic of your application endpoint.
+
+This package is highly insipred by FASTAPI which is a python library that makes the developing API supper fast while using python and seeks to introduce thesame speed for nodejs backend developers.
 
 ## Prerequisites
 This package works with node version 10.2 and up and npm version 3.4 up
@@ -9,13 +12,14 @@ This package works with node version 10.2 and up and npm version 3.4 up
 * Express
 * bodyParser
 
-```npm install docsgen
 ```
+npm install docsgen
 
+```
 ## Getting Started
-*To get this package running with your express apllicaton, follow  these simple example steps.
+*To get this package running with your express apllicaton, follow  these simple example steps.*
 
-1 ### Configure the package to your test
+- ### Configure the package to your test
 
 > At the index of your express application where you intialized the express app, import config function of the docsgen package and configure the docsgen package by parsing the following options:
 ```
@@ -43,7 +47,6 @@ This package works with node version 10.2 and up and npm version 3.4 up
 
 The configuration process will look like this:
 ```
-...
 const express =  require("express")
 const bodyParser = require('body-parser')
 const {config} = require('docgen')
