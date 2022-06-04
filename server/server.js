@@ -6,18 +6,15 @@ const {config} = require('docgen')
 const app = express()
 
 
-
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(express.urlencoded({extended: false}));
-config({app, title:"Hello world API", version:"1.0.2"})
 
-
-
+config({app, title:"Testing API", version:"1.0.0"})
 
 
 app.use('/api', router)
-// app.use('/apiv2', router)
+
 app.get('/', (req, res)=>{
     res.send('welcome')
 }) 
