@@ -1,19 +1,19 @@
-# docsgen
-This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documantation. 
+# valdocs
+This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documentation. 
 
-The Docsgen package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
+The valdocs package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
 
 This package is highly insipred by FASTAPI which is a python library that makes the developing API supper fast while using python and seeks to introduce thesame speed for nodejs backend developers.
 
 ## Prerequisites
-This package works with node version 14.18.0 and up and npm version 6.14.15 up
+This package works with
 * NPM
 * Express
 * bodyParser
 * nodemone - not necessary but a a handy tool to watch for changes
 
 ```
-npm install docsgen
+npm install valdocs
 
 ```
 ## Getting Started
@@ -49,7 +49,7 @@ The configuration process will look like this:
 ```
 const express =  require("express")
 const bodyParser = require('body-parser')
-const {config} = require('docgen')
+const {config} = require('valdocs')
 
 const app = express()
 
@@ -72,11 +72,11 @@ config(options)
 > *note that you need to used the bodyParser first as the assess to the query body depends on it, and the only required field to be provided is the express app*
 
 - ### 2. Use the Validator
-> *Import the validator function from the docgen package and pass it as the middleware function in any path operation you want to validate and generate documentation for*
+> *Import the validator function from the valdocs package and pass it as the middleware function in any path operation you want to validate and generate documentation for*
 
 ```
 ...
-const {validator} = require('docgen')
+const {validator} = require('valdocs')
 
 app.get('/',validator(), (req, res)=>{
     res.send('welcome')
