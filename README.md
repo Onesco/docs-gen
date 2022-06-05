@@ -6,7 +6,7 @@ The Docsgen package abstract the stress of documenting each API endpoints throug
 This package is highly insipred by FASTAPI which is a python library that makes the developing API supper fast while using python and seeks to introduce thesame speed for nodejs backend developers.
 
 ## Prerequisites
-This package works with node version 10.2 and up and npm version 3.4 up
+This package works with node version 14.18.0 and up and npm version 6.14.15 up
 * NPM
 * Express
 * bodyParser
