@@ -1,5 +1,9 @@
 # valdocs
+<<<<<<< HEAD
 This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documentation. 
+=======
+This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documantation. 
+>>>>>>> 695164fee86401011206b811da5a47054dc77499
 
 The valdocs package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
 
