@@ -1,7 +1,7 @@
 {
   "name": "docgen",
   "version": "1.0.0",
-  "description": "",
+  "description": "An autogenerate documetation and validation package for fast API development in nodejs",
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
