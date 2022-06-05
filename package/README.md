@@ -1,7 +1,7 @@
-# docsgen
+# valdocs
 This is a fast JSON validator for Node.js API that auto generate JSON schema for validation using the super fast power of [AJV](https://www.npmjs.com/package/ajv) json schem validator, and also auto generate json file that mets the OPEN API specification for path operation documantation. 
 
-The Docsgen package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
+The valdocs package abstract the stress of documenting each API endpoints through an automated scripts that auto generate a live express swagger ui documentation page and allow you to focus on the key business logic of your application endpoints.
 
 This package is highly insipred by FASTAPI which is a python library that makes the developing API supper fast while using python and seeks to introduce thesame speed for nodejs backend developers.
 
@@ -13,7 +13,7 @@ This package works with node version 14.18.0 and up and npm version 6.14.15 up
 * nodemone - not necessary but a a handy tool to watch for changes
 
 ```
-npm install docsgen
+npm install valdocs
 
 ```
 ## Getting Started
