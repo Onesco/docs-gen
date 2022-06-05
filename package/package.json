@@ -1,5 +1,5 @@
 {
-  "name": "docgen",
+  "name": "valdocs",
   "version": "1.0.0",
   "description": "An autogenerate documetation and validation package for fast API development in nodejs",
   "main": "index.js",
