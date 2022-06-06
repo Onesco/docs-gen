@@ -274,5 +274,5 @@ this keyword is used to define a javascript string form of a regular expression 
 At each endpoint, you test a swagger UI documentation page is created and the endpoint documentation for the path will be added to the swagger UI page. So if you navigate to the root URL address of your server/api-docs you see the API documentation page for you application. For instance, let's assume my application is running at 
 `http//localhost:8001`, then the documentation page for my API will be at `http//localhost:8001/api-docs`, and when you navigate to the URL you will see your documentation looking like:
 
-<img src="package/images/img_1.png" height="60" width="60" >
+<img src="./images/img_1.png" height="50%" width="50%" >
 
