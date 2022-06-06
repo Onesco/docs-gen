@@ -21,5 +21,6 @@
     "express": "^4.18.1",
     "lodash": "^4.17.21",
     "swagger-ui-express": "^4.4.0"
-  }
+  },
+  "keywords": ["validator","validation","validate", "documentation", "API", "OPENAPI", "Swagger"]
 }
