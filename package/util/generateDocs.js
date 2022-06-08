@@ -32,7 +32,7 @@ function generateDocs(...args) {
     if (Object.keys(params).length > 0) {
         for (let key of Object.keys(params)) {
             path = path.replace(`:${key}`, `{${key}}`);
-            opPath = opPath.replace(`:${key}`, `By${key}`);
+            opPath = opPath.replace(`:${key}`, `By ${key}`);
         }
     }
 
@@ -45,7 +45,12 @@ function generateDocs(...args) {
     } else {
     }
 
-    templete.paths[`${path}`] = {};
+    if(!templete.paths[`${path}`]){
+        templete.paths[`${path}`] = {};
+    }
+
+    templete.paths[`${path}`][`${method}`]  = {};
+
     let parameters = [];
 
     // params schema docs set up
@@ -101,8 +106,7 @@ function generateDocs(...args) {
             }
         },
         tags: [baseUrl],
-        operationId: `${method}${operationId}`,
-        
+        operationId: `${method}${operationId}`,  
     };
 
     // set the request body schema for proper documentation
