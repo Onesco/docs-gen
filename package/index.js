@@ -4,12 +4,13 @@ const {dirname, join} = require("path");
 
 const {config} = require('./config/setting')
 
+const getAuthorizationHeader = require("./security/util")
+
 const validate = require("./util/validate")
 const generateDocs = require("./util/generateDocs")
 const getRoutePath = require("./util/getRootPath")
 
 const autoGenPath =  join(getRoutePath(dirname),"autoGens")
-
 
 const {
     validateBody,
@@ -20,12 +21,12 @@ const {
 
 
 // the entry validation function
-const validator = (body, paramSchema, querySchema={}) => 
+const validator = (body, paramSchema, querySchema={}, headerSchema={}) => 
 (req, res, next) => {
     
     const method = req.method.toLocaleLowerCase()
-    const {params, query, baseUrl} = req
-    const host = req.headers.host
+    const {params, query, baseUrl, headers} = req
+    const {host} = headers
     const route = req.route.path
 
     const newPath = method+baseUrl+route
@@ -36,7 +37,7 @@ const validator = (body, paramSchema, querySchema={}) =>
     // load the previous the path and json schemas    
     let jsonSchema =  JSON.parse(fs.readFileSync(join(autoGenPath,"jsonSchema.json")))
     let pathSchema =   JSON.parse(fs.readFileSync(join(autoGenPath,"pathSchema.json")))
-    
+     
     // check if this end point has already a Jsonschema for the path operation
     // then check if any field value of the pathSchema has changed then generated new JsonSchemas
     // else used the already generated schema
@@ -63,6 +64,12 @@ const validator = (body, paramSchema, querySchema={}) =>
         // validate params
         if(paramSchema && Object.keys(paramSchema).length > 0){
             validateParams(paramSchema, params, req, res) 
+        }
+         // validate header
+         if(headerSchema && Object.keys(headerSchema).length > 0){
+             headerSchema.additionalProperties = true
+             console.log("hello")
+            validateParams(headerSchema, headers, req, res) 
         }
 
         // validate body schema since the method is not "get"
@@ -116,5 +123,6 @@ const validator = (body, paramSchema, querySchema={}) =>
 }
 module.exports = {
     validator,
-    config
+    config,
+    getAuthorizationHeader 
 }
