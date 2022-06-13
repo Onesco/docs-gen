@@ -1,6 +1,6 @@
 'use strict';
 
-const getAuthorizationHeader = async(req, res, next)=>{
+const getAuthorizationHeader = async (req, res, next)=>{
     
     const authHeader = req.get('authorization');
     if(!authHeader){
@@ -9,13 +9,12 @@ const getAuthorizationHeader = async(req, res, next)=>{
         })
     }
     else{
-        let tokenObj = await getAuthorizationToken(authHeader, res)
-        next()
+        let tokenObj = await getAuthorizationToken(authHeader, res, next)
         return tokenObj
     }
 }
 
-const getAuthorizationToken = async (authHeader, res)=>{
+const getAuthorizationToken = async (authHeader, res, next)=>{
 
     let token;
     let type;
@@ -30,8 +29,10 @@ const getAuthorizationToken = async (authHeader, res)=>{
         res.status(403).send({
             message:"not authenticated"
         })
+    }else{
+       next()
     }
-    
+
     return {
         token,
         type
