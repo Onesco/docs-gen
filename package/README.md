@@ -276,3 +276,8 @@ At each endpoint, you test a swagger UI documentation page is created and the en
 
 <img src="./images/img_1.png">
 
+## Features to be Added
+* deleting of the JSDocs should incase the endpoint route is deleted --*inprogress while be avaliable in the next release*
+* implementation of OAuth2 security ahtorization --*inprogress while be avaliable in the next release*
+* implementation of response validation
+
