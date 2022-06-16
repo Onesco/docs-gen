@@ -1,9 +1,8 @@
 const swaggerUi = require('swagger-ui-express')
-const express =  require("express")
 const fs = require("fs")
-const app = express()
 const { join, dirname} = require('path')
 
+const {setAppAndDocsPath} = require('../config/setting')
 
 const getRoutePath = require("./getRootPath")
 const autoGenPath = join(getRoutePath(dirname),"autoGens")
@@ -122,8 +121,9 @@ function generateDocs(...args) {
         }
         
     }
+    const {docs, app} = setAppAndDocsPath()
     // load the swaggerUI to update the documentation page
-    app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
+    app.use(`/${docs}`, swaggerUi.serve, swaggerUi.setup(templete))
     
 return {
     operationId,

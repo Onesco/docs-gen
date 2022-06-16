@@ -1,11 +1,30 @@
 const swaggerUi = require('swagger-ui-express')
 const fs = require("fs")
 const {dirname, join } = require("path");
+const yargs = require("yargs")
 
 const getRootPath = require("../util/getRootPath")
 const getMetadata = require("./getMetadata")
+const updateSwaggerDocs = require("../UpdateSwaggerDocs/")
 
+let obj1
+const setAppAndDocsPath =(obj)=>{
+    obj1 = obj?obj:obj1
+    return obj1
+}
 
+let argv = yargs
+.command("update", "update route docs")
+.help()
+.argv; 
+let command = process.argv[2];
+if (command == "update"){
+    updateEndpointsDocs()
+}
+
+const updateRoute= ()=>{
+
+}
 const config = (...options)=>{
     let {
         title,
@@ -22,6 +41,7 @@ const config = (...options)=>{
     
     let docs = docsPath ? docsPath : 'api-docs'
     let autoGenPath =  join(getRootPath(dirname),"autoGens")
+    setAppAndDocsPath({docs,app})
 
     const templete = getMetadata({
         title,
@@ -32,8 +52,6 @@ const config = (...options)=>{
         license,
         contact
     })
- 
-   
 
    if(!fs.existsSync(autoGenPath)){
        fs.mkdirSync(autoGenPath, {recursive:true})
@@ -84,5 +102,6 @@ const config = (...options)=>{
 }
 
 module.exports ={
-    config
+    config,
+    setAppAndDocsPath
 }
