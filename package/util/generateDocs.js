@@ -54,7 +54,7 @@ function generateDocs(...args) {
     let parameters = [];
 
     // params schema docs set up
-    if (Object.keys(params).length > 0) {
+    if (params && Object.keys(params).length > 0) {
         for (let key of Object.keys(params)) {
             parameters = [...parameters, {
                 name: key,
@@ -63,12 +63,12 @@ function generateDocs(...args) {
                 schema: paramsSchema?.properties[`${key}`]
             }];
         }
-        templete.paths[`${path}`].parameters = parameters;
+        templete.paths[`${path}`][`${method}`].parameters = parameters;
     }
-
     // query schema docs set up
-    if (Object.keys(querySchema).length > 0) {
+    if (querySchema && Object.keys(querySchema).length > 0) {
         for (let key of Object.keys(querySchema)) {
+            
             parameters = [...parameters, {
                 name: key,
                 in: 'query',
@@ -76,7 +76,8 @@ function generateDocs(...args) {
                 schema: qSchema?.properties[`${key}`]
             }];
         }
-        templete.paths[`${path}`].parameters = parameters;
+        
+        templete.paths[`${path}`][`${method}`]['parameters'] = parameters;
         parameters = [];
     } else {
         parameters = [];
@@ -89,6 +90,7 @@ function generateDocs(...args) {
 
     baseUrl = baseUrl === "" ? baseUrl : baseUrl.split('/')[1];
     templete.paths[`${path}`][`${method}`] = {
+        ...templete.paths[`${path}`][`${method}`],
         description: `This end point is for ${method}ing ${desscription}`,
         responses: {
             200: {
