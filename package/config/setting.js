@@ -1,6 +1,7 @@
 const swaggerUi = require('swagger-ui-express')
 const fs = require("fs")
 const {dirname, join } = require("path");
+const _ = require("lodash")
 
 const getRootPath = require("../util/getRootPath")
 const getMetadata = require("./getMetadata")
@@ -33,7 +34,7 @@ const config = (...options)=>{
         contact
     })
  
-  // create all the needed files   
+   // create all the needed files in autoGens directory
    if(!fs.existsSync(autoGenPath)){
        fs.mkdirSync(autoGenPath, {recursive:true})
        
@@ -64,6 +65,7 @@ const config = (...options)=>{
     const [routes, tem] = getRegisteredRoutesTemplete(app)
     let registeredTempelete = tem && JSON.parse(tem)
     
+    // update and render the updated JSdocs for any deleted path
     if(registeredTempelete && Object.keys(jsonSchema).length < 1){
               
         app.use(`/${docs}`, function(req, res, next){
@@ -75,9 +77,15 @@ const config = (...options)=>{
             next();
         }, swaggerUi.serveFiles(registeredTempelete), swaggerUi.setup());
     }
+    // render JSdocs templete for all the registered routes in the app 
     else{
         let currentTemplate = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
         const currentPath = {}
+
+        //update Jsdocs swagger templete info object if there is any chnage
+        if(!_.isEqual(templete.info, currentTemplate.info)){
+            currentTemplate.info = templete.info
+        }   
     
         for(let routeObj of routes){
             if(currentTemplate.paths[routeObj.path] && currentTemplate.paths[routeObj.path][routeObj.method]){
@@ -90,6 +98,13 @@ const config = (...options)=>{
         }
         currentTemplate.paths = currentPath
         app.use(`/${docs}`,swaggerUi.serve, swaggerUi.setup(currentTemplate))
+        currentTemplate && (
+            fs.writeFileSync( join(autoGenPath, "swaggerDocument.json"), JSON.stringify(currentTemplate),
+                (err)=>{
+                    if(err) console.log(err)
+                } 
+            )
+        )
     }
 }
 
