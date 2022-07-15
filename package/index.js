@@ -19,7 +19,6 @@ const {
 } = require("./util/pathOperation");
 
 
-
 // the entry validation function
 const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrategy) => 
  async (req, res, next) => {
@@ -79,7 +78,6 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
          // validate header
          if(headerSchema && Object.keys(headerSchema).length > 0){
              headerSchema.additionalProperties = true
-             console.log("hello")
             validateParams(headerSchema, headers, req, res) 
         }
 
@@ -150,5 +148,6 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
 module.exports = {
     validator,
     config,
-    getAuthorizationHeader 
+    getAuthorizationHeader,
+    generateDocs 
 }

@@ -11,7 +11,7 @@ This package is highly inspired by FASTAPI which is a python library that makes 
 This package works with
 * NPM
 * Express
-* bodyParser
+* bodyParser or ExpresJs built in body parser
 * nodemone - not necessary but a a handy tool to watch for changes
 
 ```
@@ -57,7 +57,7 @@ const app = express()
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-const options = {
+const settings = {
     app,
     title:"Testing API", 
     version:"1.0.0",
@@ -67,10 +67,10 @@ const options = {
     },
     ...
 }
-config(options)
+config(settings)
 ...
 ```
-> *note that you need to use the body-parser first as this allows the application to assess the query body on which this package depends on. Secondly, the only required field to be provided to the config option object is the express app*
+> *note that you need to use the bodyParser middleware  or express.json() and express.urlencoded() middleware first as this allows the application to assess the route body object on which this package depends on. More also, the config function must be called immediately after all the registered routes and not before as this will allow the package to provide JSdocs for all the registered routes. The only required setting parameter that must be provided to the config function call is the express app object*
 
 - ### 2. Use the Validator
 > *Import the validator function from the valdocs package and pass it as the middleware function in any path operation you want to validate and generate documentation for*
@@ -277,7 +277,6 @@ At each endpoint, you test a swagger UI documentation page is created and the en
 <img src="./images/img_1.png">
 
 ## Features to be Added
-* auto-update of the JSDocs should in case the endpoint route is deleted or commented out --*in progress while be avaliable in the next release*
 * implementation of OAuth2 security athorization --*in progress while be avaliable in the next release*
 * implementation of response validation
 

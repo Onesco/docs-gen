@@ -29,18 +29,20 @@ function generateDocs(...args) {
     // replace the :id to {id} on path parameter
     // get operationID path
     let opPath = path;
-    if (Object.keys(params).length > 0) {
+    if (params && Object.keys(params).length > 0) {
         for (let key of Object.keys(params)) {
             path = path.replace(`:${key}`, `{${key}}`);
             opPath = opPath.replace(`:${key}`, `By ${key}`);
         }
     }
+    let httpHost
+    let httpsHost
+    if(host){
+        httpHost = { url: `http://${host}` };
+        httpsHost = { url: `https://${host}` };
+    }
 
-    let httpHost = { url: `http://${host}` };
-    let httpsHost = { url: `https://${host}` };
-
-
-    if (templete.servers.length == 0) {
+    if (host && templete.servers.length == 0) {
         templete.servers = [httpHost, httpsHost];
     } else {
     }
@@ -53,14 +55,15 @@ function generateDocs(...args) {
 
     let parameters = [];
 
+    let defaultParamSchema = {type: 'string'}
     // params schema docs set up
     if (params && Object.keys(params).length > 0) {
         for (let key of Object.keys(params)) {
             parameters = [...parameters, {
                 name: key,
                 in: 'path',
-                required: !paramsSchema?.required?.indexOf(key),
-                schema: paramsSchema?.properties[`${key}`]
+                required: !paramsSchema?.required?.indexOf(key) || true,
+                schema: paramsSchema?.properties[`${key}`] || defaultParamSchema
             }];
         }
         templete.paths[`${path}`][`${method}`].parameters = parameters;
@@ -126,7 +129,7 @@ function generateDocs(...args) {
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
     
 return {
-    operationId,
+    operationId: `${method}${operationId}`,
     openAPI:JSON.stringify(templete)
     }
 }
