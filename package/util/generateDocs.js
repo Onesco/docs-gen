@@ -11,7 +11,7 @@ const autoGenPath = join(getRoutePath(dirname),"autoGens")
 let saveTemplete
 
 function generateDocs(...args) {
-    const templete = saveTemplete || require(join(autoGenPath, "swaggerDocument.json")) 
+    const templete = saveTemplete || JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
     
     args = args[0];
     let { 
