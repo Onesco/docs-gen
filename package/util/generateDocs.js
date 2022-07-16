@@ -8,8 +8,10 @@ const { join, dirname} = require('path')
 const getRoutePath = require("./getRootPath")
 const autoGenPath = join(getRoutePath(dirname),"autoGens")
 
+let saveTemplete
+
 function generateDocs(...args) {
-    const templete = require(join(autoGenPath, "swaggerDocument.json")) 
+    const templete = saveTemplete || require(join(autoGenPath, "swaggerDocument.json")) 
     
     args = args[0];
     let { 
@@ -127,6 +129,8 @@ function generateDocs(...args) {
     }
     // load the swaggerUI to update the documentation page
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
+
+    saveTemplete = templete
     
 return {
     operationId: `${method}${operationId}`,
