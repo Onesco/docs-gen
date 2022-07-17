@@ -8,8 +8,8 @@ const router =  Router()
 const post ={
     name: 'string',
     age: 'number required',
-    isTrue:'boolean required',
-    email:'email',
+    isTrue:'boolean required', 
+    email:'string required',
 }
 const paramSchema ={
     userId:'string required',
