@@ -80,17 +80,25 @@ const config = (...options)=>{
     // render JSdocs templete for all the registered routes in the app 
     else{
         let currentTemplate = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
+        let currentJsonSchema = JSON.parse(fs.readFileSync(join(autoGenPath, "jsonSchema.json")))
+        let currentPathSchema = JSON.parse(fs.readFileSync(join(autoGenPath, "pathSchema.json")))
+        
         const currentPath = {}
+        const uptatedJsonSchema = {}
+        const uptatedPathSchema = {}
 
         //update Jsdocs swagger templete info object if there is any chnage
         if(!_.isEqual(templete.info, currentTemplate.info)){
             currentTemplate.info = templete.info
         }   
-    
+       
         for(let routeObj of routes){
             if(currentTemplate.paths[routeObj.path] && currentTemplate.paths[routeObj.path][routeObj.method]){
                 currentPath[routeObj.path] = {...currentPath[routeObj.path]}
                 currentPath[routeObj.path][routeObj.method] = currentTemplate.paths[routeObj.path][routeObj.method]
+
+                currentJsonSchema[routeObj.fullPath] ? uptatedJsonSchema[routeObj.fullPath] = currentJsonSchema[routeObj.fullPath] : null
+                currentPathSchema[routeObj.fullPath] ? uptatedPathSchema[routeObj.fullPath] = currentPathSchema[routeObj.fullPath] : null
             }else{
                 currentPath[routeObj.path] = {...currentPath[routeObj.path]}
                 currentPath[routeObj.path][routeObj.method] = registeredTempelete.paths[routeObj.path][routeObj.method]
@@ -105,6 +113,21 @@ const config = (...options)=>{
                 } 
             )
         )
+        uptatedJsonSchema && (
+            fs.writeFileSync( join(autoGenPath,  "jsonSchema.json"), JSON.stringify(uptatedJsonSchema),
+                (err)=>{
+                    if(err) console.log(err)
+                } 
+            )
+        )
+        uptatedPathSchema && (
+            fs.writeFileSync( join(autoGenPath, "pathSchema.json"), JSON.stringify(uptatedPathSchema),
+                (err)=>{
+                    if(err) console.log(err)
+                } 
+            )
+        )
+
     }
 }
 
