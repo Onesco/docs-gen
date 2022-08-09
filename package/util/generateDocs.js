@@ -11,7 +11,6 @@ const autoGenPath = join(getRoutePath(dirname),"autoGens")
 let saveTemplete
 
 function generateDocs(...args) {
-    const templete = saveTemplete || JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
     
     args = args[0];
     let { 
@@ -23,9 +22,14 @@ function generateDocs(...args) {
         host, 
         bodySchema,
         paramsSchema,
-        qSchema
+        qSchema,
+        update
     } = args;
-
+    const currentTemplate = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
+    let templete = saveTemplete || currentTemplate
+    if(update){
+        templete = currentTemplate 
+    }
     let path = baseUrl + route;
    
     // replace the :id to {id} on path parameter

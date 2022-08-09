@@ -121,7 +121,8 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
             host, 
             bodySchema,
             paramsSchema,
-            qSchema
+            qSchema,
+            update:true
         })
 
         // the generated json path schema
@@ -144,7 +145,7 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
         //     next()
         // }
     }
-}
+} 
 module.exports = {
     validator,
     config,

@@ -64,7 +64,7 @@ const config = (...options)=>{
 
     const [routes, tem] = getRegisteredRoutesTemplete(app)
     let registeredTempelete = tem && JSON.parse(tem)
-    
+       
     // update and render the updated JSdocs for any deleted path
     if(registeredTempelete && Object.keys(jsonSchema).length < 1){
               
@@ -76,6 +76,12 @@ const config = (...options)=>{
             req.swaggerDoc = registeredTempelete;
             next();
         }, swaggerUi.serveFiles(registeredTempelete), swaggerUi.setup());
+
+        fs.writeFileSync( join(autoGenPath, "swaggerDocument.json"), JSON.stringify(registeredTempelete),
+            (err)=>{
+                if(err) console.log(err)
+            } 
+        )
     }
     // render JSdocs templete for all the registered routes in the app 
     else{
@@ -93,13 +99,15 @@ const config = (...options)=>{
         }   
        
         for(let routeObj of routes){
+            
             if(currentTemplate.paths[routeObj.path] && currentTemplate.paths[routeObj.path][routeObj.method]){
                 currentPath[routeObj.path] = {...currentPath[routeObj.path]}
                 currentPath[routeObj.path][routeObj.method] = currentTemplate.paths[routeObj.path][routeObj.method]
-
+        
                 currentJsonSchema[routeObj.fullPath] ? uptatedJsonSchema[routeObj.fullPath] = currentJsonSchema[routeObj.fullPath] : null
                 currentPathSchema[routeObj.fullPath] ? uptatedPathSchema[routeObj.fullPath] = currentPathSchema[routeObj.fullPath] : null
             }else{
+                
                 currentPath[routeObj.path] = {...currentPath[routeObj.path]}
                 currentPath[routeObj.path][routeObj.method] = registeredTempelete.paths[routeObj.path][routeObj.method]
             }
