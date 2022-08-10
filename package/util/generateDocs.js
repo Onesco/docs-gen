@@ -122,13 +122,42 @@ function generateDocs(...args) {
 
     // set the request body schema for proper documentation
     if(bodySchema){
+        templete.components.schemas[`${method}${operationId}`] = bodySchema
         templete.paths[`${path}`][`${method}`].requestBody = {
             content:{
                 "application/json": {
-                    "schema":bodySchema
-                }
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/xml": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "multipart/form-data": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "image/png": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/octet-stream": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
             }
         }
+        
         
     }
     // load the swaggerUI to update the documentation page
