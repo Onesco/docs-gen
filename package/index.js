@@ -109,7 +109,11 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
         }
         
         // set the security scheme if presnent
-        let {securityScheme, schemeName} = authStrategy && authStrategy
+        let schemeName, securityScheme = null
+        if (authStrategy) {
+           securityScheme = authStrategy.securityScheme
+           schemeName = authStrategy.schemeName
+        } 
 
         // generate json schemas for the path operation
         let {bodySchema, paramsSchema, qSchema} = req
