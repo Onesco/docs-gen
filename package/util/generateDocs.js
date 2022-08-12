@@ -8,8 +8,6 @@ const { join, dirname} = require('path')
 const getRoutePath = require("./getRootPath")
 const autoGenPath = join(getRoutePath(dirname),"autoGens")
 
-let saveTemplete
-
 function generateDocs(...args) {
     
     args = args[0];
@@ -27,10 +25,10 @@ function generateDocs(...args) {
         securityScheme,
         schemeName
     } = args;
-    const currentTemplate = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
-    let templete = saveTemplete || currentTemplate
+    
+    let templete = require(join(autoGenPath, "swaggerDocument.json"))
     if(update){
-        templete = currentTemplate 
+        templete = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
     }
     let path = baseUrl + route;
    
@@ -170,12 +168,11 @@ function generateDocs(...args) {
     }
     // load the swaggerUI to update the documentation page
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
-
-    saveTemplete = templete
     
 return {
     operationId: `${method}${operationId}`,
     openAPI:JSON.stringify(templete)
     }
 }
+
 module.exports = generateDocs
