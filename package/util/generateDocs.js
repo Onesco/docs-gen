@@ -23,7 +23,9 @@ function generateDocs(...args) {
         bodySchema,
         paramsSchema,
         qSchema,
-        update
+        update,
+        securityScheme,
+        schemeName
     } = args;
     const currentTemplate = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
     let templete = saveTemplete || currentTemplate
@@ -101,6 +103,7 @@ function generateDocs(...args) {
     templete.paths[`${path}`][`${method}`] = {
         ...templete.paths[`${path}`][`${method}`],
         description: `This end point is for ${method}ing ${desscription}`,
+        summary: `${method} ${desscription}`,
         responses: {
             200: {
                 description: "sucessful",
@@ -156,9 +159,14 @@ function generateDocs(...args) {
                     }
                 },
             }
-        }
-        
-        
+        } 
+    }
+    // add the security scheme to the security schemes of the router component  
+    if(securityScheme){
+        templete.components.securitySchemes[schemeName] = securityScheme
+        let schemeObj = {}
+        schemeObj[schemeName] =[]
+        templete.paths[`${path}`][`${method}`]['security'] = [schemeObj]
     }
     // load the swaggerUI to update the documentation page
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
