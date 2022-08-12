@@ -4,7 +4,11 @@ const {dirname, join} = require("path");
 
 const {config} = require('./config/setting')
 
-const getAuthorizationHeader = require("./security/util")
+const {
+    httpSecurityScheme,
+    Oauth2Scheme,
+    apiKeyScheme
+} = require("./security")
 
 const validate = require("./util/validate")
 const generateDocs = require("./util/generateDocs")
@@ -45,24 +49,24 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
    
     if(jsonSchema.hasOwnProperty(newPath) && _.isEqual(pathSchema[`${newPath}`], JSON.parse(JSON.stringify(obj)))){
        
+        if(authStrategy && (authStrategy.type ==='bearer' || authStrategy.type ==='basic' )){
+            authStrategy.getToken(req, res, next)
+        }
+        else if(authStrategy && authStrategy.type ==='apiKey' ){
+            const {name} = authStrategy.securityScheme
+            const where = authStrategy.securityScheme.in
+            authStrategy.getApikey(req, res, next, where, name)
+        }
+
         let {bodySchema,paramsSchema,qSchema} = jsonSchema[`${newPath}`]
         paramsSchema ? validate(paramsSchema, params, req, res) : null
         qSchema ? validate(qSchema, query, req, res) : null
         bodySchema ? validate(bodySchema, req.body, req, res): null
-
-        if(authStrategy){
-           token = await getAuthorizationHeader(req, res, next)
-           req.token = token
+        
+        if(!req?.isInvalid){
+            next()
         }
-        else{
-            if(!req?.isInvalid){
-                try {
-                    next()
-                } catch (error) {
-                }
-            }
-        }
-      
+              
     } 
     // if the path is new one then validate its path operations
     else{
@@ -95,22 +99,21 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
             }
         }
 
-        if(authStrategy){
-            token = await getAuthorizationHeader(req, res, next)
-            req.token = token
+        if(authStrategy && (authStrategy.type ==='bearer' || authStrategy.type ==='basic')){
+            authStrategy.getToken(req, res, next)
         }
-        else{
-            if(!req?.isInvalid){
-                try {
-                    next()
-                } catch (error) {
-                }
-            }
+        else if(authStrategy && authStrategy.type ==='apiKey' ){
+            const {name} = authStrategy.securityScheme
+            const where = authStrategy.securityScheme.in
+            authStrategy.getApikey(req, res, next, where, name)
         }
+        
+        // set the security scheme if presnent
+        let {securityScheme, schemeName} = authStrategy && authStrategy
 
         // generate json schemas for the path operation
         let {bodySchema, paramsSchema, qSchema} = req
-        // console.log(qSchema, querySchema)
+    
           // generate documentation for the path
         const {openAPI} = generateDocs({
             method, 
@@ -122,7 +125,9 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
             bodySchema,
             paramsSchema,
             qSchema,
-            update:true
+            update:true,
+            securityScheme,
+            schemeName
         })
 
         // the generated json path schema
@@ -140,15 +145,18 @@ const validator = (body, paramSchema, querySchema={}, headerSchema={}, authStrat
         fs.writeFile(join(autoGenPath,"swaggerDocument.json"),openAPI,(err)=>{})
         fs.writeFile(join(autoGenPath,"jsonSchema.json"),JSON.stringify(jsonSchema),(err)=>{})
         fs.writeFile(join(autoGenPath,"pathSchema.json"),JSON.stringify(pathSchema),(err)=>{})
-        // move the next route function after validation
-        // if(token){   
-        //     next()
-        // }
+
+        if(!req?.isInvalid){
+            next()
+        }
+        
     }
 } 
 module.exports = {
     validator,
     config,
-    getAuthorizationHeader,
+    httpSecurityScheme,
+    Oauth2Scheme,
+    apiKeyScheme,
     generateDocs 
 }
