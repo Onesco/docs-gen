@@ -7,14 +7,15 @@ const getAuthorizationHeader = async (req, res, next)=>{
         res.status(403).send({
             message:"not authenticated"
         })
+        req.isInvalid = true
     }
     else{
-        let tokenObj = await getAuthorizationToken(authHeader, res, next)
+        let tokenObj = await getAuthorizationToken(authHeader, res, req, next)
         return tokenObj
     }
 }
 
-const getAuthorizationToken = async (authHeader, res, next)=>{
+const getAuthorizationToken = async (authHeader, res, req, next)=>{
 
     let token;
     let type;
@@ -29,13 +30,9 @@ const getAuthorizationToken = async (authHeader, res, next)=>{
         res.status(403).send({
             message:"not authenticated"
         })
+        req.isInvalid = true
     }else{
-       next()
-    }
-
-    return {
-        token,
-        type
+        req.token ={token,type}
     }
 }
 

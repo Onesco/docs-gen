@@ -3,13 +3,13 @@ const {Router} = require("express");
 const {validator} = require('docgen')
 
 
-const router =  Router()
+const userRouter =  Router()
 
 const post ={
-    name: 'string',
+    name: 'string required',
     age: 'number required',
     isTrue:'boolean required', 
-    email:'string required',
+    email:'email required', 
 }
 const paramSchema ={
     userId:'string required',
@@ -22,34 +22,31 @@ const querySchema ={
 }
 
 
-router.get('/users',validator(), (req, res)=>{
-    res.send("hello world")
-})
 
-router.post(`/users`, validator(post), (req, res)=>{
+userRouter.post(`/users`, validator(post), (req, res)=>{
     res.send("hello world users" )
 })
-router.get(`/users/mess`, validator(null), (req, res)=>{
+userRouter.get(`/users`, validator(null), (req, res)=>{
     res.send("hello world users" )
 })
-router.get(`/users/:userId/`, validator({},paramSchema), (req, res)=>{
+userRouter.get(`/users/:userId/`, validator({},paramSchema), (req, res)=>{
     res.send("hello world " + req.params.id)
 })
 
-router.get(`/users/:userId/comments/:commentId`, validator({},paramSchema,querySchema), (req, res)=>{
+userRouter.get(`/users/:userId/comments/:commentId`, validator({},paramSchema,querySchema), (req, res)=>{
     res.send("hello world " + req.params.id)
 })
 
-router.get('/', validator(), (req, res)=>{
+userRouter.get('/', validator(), (req, res)=>{
     res.send("hello world")
 })
 
-router.get(`/users`, validator(null,null,querySchema), (req, res)=>{
+userRouter.get(`/users`, validator(null,null,querySchema), (req, res)=>{
     res.send("hello world users" )
 })
 
 
 
 module.exports  = {
-    router
+    userRouter
 }

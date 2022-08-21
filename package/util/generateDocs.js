@@ -8,10 +8,7 @@ const { join, dirname} = require('path')
 const getRoutePath = require("./getRootPath")
 const autoGenPath = join(getRoutePath(dirname),"autoGens")
 
-let saveTemplete
-
 function generateDocs(...args) {
-    const templete = saveTemplete || JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
     
     args = args[0];
     let { 
@@ -23,9 +20,16 @@ function generateDocs(...args) {
         host, 
         bodySchema,
         paramsSchema,
-        qSchema
+        qSchema,
+        update,
+        securityScheme,
+        schemeName
     } = args;
-
+    
+    let templete = require(join(autoGenPath, "swaggerDocument.json"))
+    if(update){
+        templete = JSON.parse(fs.readFileSync(join(autoGenPath, "swaggerDocument.json")))
+    }
     let path = baseUrl + route;
    
     // replace the :id to {id} on path parameter
@@ -97,6 +101,7 @@ function generateDocs(...args) {
     templete.paths[`${path}`][`${method}`] = {
         ...templete.paths[`${path}`][`${method}`],
         description: `This end point is for ${method}ing ${desscription}`,
+        summary: `${method} ${desscription}`,
         responses: {
             200: {
                 description: "sucessful",
@@ -118,23 +123,56 @@ function generateDocs(...args) {
 
     // set the request body schema for proper documentation
     if(bodySchema){
+        templete.components.schemas[`${method}${operationId}`] = bodySchema
         templete.paths[`${path}`][`${method}`].requestBody = {
             content:{
                 "application/json": {
-                    "schema":bodySchema
-                }
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/xml": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "multipart/form-data": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "image/png": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
+                "application/octet-stream": {
+                    "schema":{
+                        "$ref": `#/components/schemas/${method}${operationId}`
+                    }
+                },
             }
-        }
-        
+        } 
+    }
+    // add the security scheme to the security schemes of the router component  
+    if(securityScheme){
+        templete.components.securitySchemes[schemeName] = securityScheme
+        let schemeObj = {}
+        schemeObj[schemeName] =[]
+        templete.paths[`${path}`][`${method}`]['security'] = [schemeObj]
     }
     // load the swaggerUI to update the documentation page
     app.use(`/api-docs`, swaggerUi.serve, swaggerUi.setup(templete))
-
-    saveTemplete = templete
     
 return {
     operationId: `${method}${operationId}`,
     openAPI:JSON.stringify(templete)
     }
 }
+
 module.exports = generateDocs

@@ -20,14 +20,14 @@ const getRegisteredRoutesTemplete = (app)=>{
                 }
             }
 
-            let {openAPI, operationId} = generateDocs({
+            let {openAPI} = generateDocs({
                 route:path,
                 method: method,
                 baseUrl:'',
                 params
             })
 
-            routes.push({path,method,operationId});
+            routes.push({path,method,fullPath:method+middleware.route.path});
 
             tem = openAPI
 
@@ -54,13 +54,13 @@ const getRegisteredRoutesTemplete = (app)=>{
                 }
             
                 if(route){
-                    let {openAPI, operationId} = generateDocs({
+                    let {openAPI} = generateDocs({
                         route:path,
                         method,
                         baseUrl,
                         params
                     })
-                    routes.push({path:baseUrl+path,method,operationId});
+                    routes.push({path:baseUrl+path,method,fullPath:method+baseUrl+handler.route.path});
                     tem = openAPI
                 }
             });
